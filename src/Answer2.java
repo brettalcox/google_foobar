@@ -1,22 +1,28 @@
-import com.sun.xml.internal.fastinfoset.util.CharArray;
-
-import java.util.Arrays;
 import java.util.LinkedList;
+import java.lang.Math;
 
 /**
  * Created by BA042808 on 4/11/2016.
  */
 public class Answer2 {
     public static void main(String[] args) {
-        answer(265789);
+        answer(8);
     }
-    public static String[] answer(int x) {
+
+    public static long convertToBaseThree(Integer input) {
         long ret = 0, factor = 1;
-        while (x > 0) {
-            ret += x % 3 * factor;
-            x /= 3;
+        while (input > 0) {
+            ret += input % 3 * factor;
+            input /= 3;
             factor *= 10;
         }
+        return ret;
+    }
+
+    public static String[] answer(int x) {
+        Integer inputValue = x;
+
+        long ret = convertToBaseThree(x);
 
         LinkedList<Long> stack = new LinkedList<Long>();
         while (ret > 0) {
@@ -24,10 +30,80 @@ public class Answer2 {
             ret = ret / 10;
         }
 
-        while (!stack.isEmpty()) {
-            System.out.print(stack.pop());
+        LinkedList<Long> weight = new LinkedList<Long>();
+        Boolean hasSeenTwo = false;
+
+        for (int i = stack.size() - 1; i >= 0; i--) {
+            if (stack.get(i) == 2) {
+                if (hasSeenTwo) {
+                    weight.push((long) 0);
+                }
+                if (!hasSeenTwo && i == stack.size() - 1) {
+                    weight.push((long) 1);
+                    hasSeenTwo = true;
+                }
+                if (!hasSeenTwo && i != stack.size() - 1){
+                    weight.push((long) 1);
+                    hasSeenTwo = true;
+                }
+            }
+            if (stack.get(i) == 0) {
+                weight.push((long) 0);
+                if (hasSeenTwo) {
+                    hasSeenTwo = false;
+                }
+            }
+            if (stack.get(i) == 1) {
+                if (hasSeenTwo) {
+                    weight.push((long) 1);
+                } else {
+                    weight.push((long) 0);
+                }
+            }
         }
 
-        return null;
+        int baseTenWeight = 0;
+        int j = 0;
+        for (int i = weight.size() - 1; i >= 0; i--) {
+            baseTenWeight += (weight.get(j) * Math.pow(3, i));
+            j++;
+        }
+
+        int totalSum = baseTenWeight + inputValue;
+        ret = convertToBaseThree(totalSum);
+
+        LinkedList<Long> endSum = new LinkedList<Long>();
+        while (ret > 0) {
+            endSum.push( ret % 10 );
+            ret = ret / 10;
+        }
+
+        int endingSum = 0;
+        j = 0;
+        for (int i = endSum.size() - 1; i >= 0; i--) {
+            endingSum += (endSum.get(j) * Math.pow(3, i));
+            j++;
+        }
+
+        String[] weightString = new String[endSum.size()];
+
+        if (weight.size() != endSum.size()) {
+            weight.push((long) 0);
+        }
+        for (int i = endSum.size() - 1; i >= 0; i--) {
+
+            if (weight.get(i) == 1) {
+                weightString[i] = "L";
+            }
+            if (weight.get(i) == 0 && endSum.get(i) == 0) {
+                weightString[i] = "-";
+            }
+
+            if (endSum.get(i) == 1) {
+                weightString[i] = "R";
+            }
+        }
+
+        return weightString;
     }
 }
